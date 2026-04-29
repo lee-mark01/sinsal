@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.sinsal.SimpleTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-04-28T16:59:20" hostname="leeseunghee" time="0.053">
-  <properties/>
-  <testcase name="sanityCheck()" classname="com.sinsal.SimpleTest" time="0.053"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
