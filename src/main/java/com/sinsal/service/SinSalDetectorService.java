@@ -11,8 +11,9 @@ import java.util.*;
 /**
  * 신살 탐지 서비스 — sin_sal.ts의 findSinSals() 포팅
  *
- * 구현된 신살 7종:
- *   천을귀인, 도화살, 역마살, 공망, 화개살, 원진살, 귀문관살
+ * 구현된 신살 15종:
+ *   천을귀인, 천덕귀인, 월덕귀인, 문창귀인, 학당귀인, 금여록,
+ *   도화살, 역마살, 공망, 화개살, 원진살, 귀문관살, 양인살, 백호살, 고숙살
  */
 @Service
 public class SinSalDetectorService {
@@ -53,6 +54,110 @@ public class SinSalDetectorService {
         Map.entry(EarthlyBranch.HAE,  Set.of(EarthlyBranch.SIN,  EarthlyBranch.YU))
     );
 
+    /**
+     * 문창귀인 판단표: 일간 → 해당 지지
+     */
+    private static final Map<HeavenlyStem, EarthlyBranch> MUN_CHANG_TABLE = Map.of(
+        HeavenlyStem.GAP,    EarthlyBranch.SA,
+        HeavenlyStem.EUL,    EarthlyBranch.O,
+        HeavenlyStem.BYEONG, EarthlyBranch.SIN,
+        HeavenlyStem.JEONG,  EarthlyBranch.YU,
+        HeavenlyStem.MU,     EarthlyBranch.SIN,
+        HeavenlyStem.GI,     EarthlyBranch.YU,
+        HeavenlyStem.GYEONG, EarthlyBranch.HAE,
+        HeavenlyStem.SIN,    EarthlyBranch.JA,
+        HeavenlyStem.IM,     EarthlyBranch.IN,
+        HeavenlyStem.GYE,    EarthlyBranch.MYO
+    );
+
+    /**
+     * 학당귀인 판단표: 일간 → 장생(長生) 위치 지지
+     */
+    private static final Map<HeavenlyStem, EarthlyBranch> HAK_DANG_TABLE = Map.of(
+        HeavenlyStem.GAP,    EarthlyBranch.HAE,
+        HeavenlyStem.EUL,    EarthlyBranch.O,
+        HeavenlyStem.BYEONG, EarthlyBranch.IN,
+        HeavenlyStem.JEONG,  EarthlyBranch.YU,
+        HeavenlyStem.MU,     EarthlyBranch.IN,
+        HeavenlyStem.GI,     EarthlyBranch.YU,
+        HeavenlyStem.GYEONG, EarthlyBranch.SA,
+        HeavenlyStem.SIN,    EarthlyBranch.JA,
+        HeavenlyStem.IM,     EarthlyBranch.SIN,
+        HeavenlyStem.GYE,    EarthlyBranch.MYO
+    );
+
+    /**
+     * 금여록 판단표: 일간 → 해당 지지
+     */
+    private static final Map<HeavenlyStem, EarthlyBranch> GEUM_YEO_TABLE = Map.of(
+        HeavenlyStem.GAP,    EarthlyBranch.JIN,
+        HeavenlyStem.EUL,    EarthlyBranch.SA,
+        HeavenlyStem.BYEONG, EarthlyBranch.MI,
+        HeavenlyStem.JEONG,  EarthlyBranch.SIN,
+        HeavenlyStem.MU,     EarthlyBranch.MI,
+        HeavenlyStem.GI,     EarthlyBranch.SIN,
+        HeavenlyStem.GYEONG, EarthlyBranch.SUL,
+        HeavenlyStem.SIN,    EarthlyBranch.HAE,
+        HeavenlyStem.IM,     EarthlyBranch.CHUK,
+        HeavenlyStem.GYE,    EarthlyBranch.IN
+    );
+
+    /**
+     * 양인살 판단표: 일간 → 제왕(帝旺) 위치 지지
+     */
+    private static final Map<HeavenlyStem, EarthlyBranch> YANG_IN_TABLE = Map.of(
+        HeavenlyStem.GAP,    EarthlyBranch.MYO,
+        HeavenlyStem.EUL,    EarthlyBranch.JIN,
+        HeavenlyStem.BYEONG, EarthlyBranch.O,
+        HeavenlyStem.JEONG,  EarthlyBranch.MI,
+        HeavenlyStem.MU,     EarthlyBranch.O,
+        HeavenlyStem.GI,     EarthlyBranch.MI,
+        HeavenlyStem.GYEONG, EarthlyBranch.YU,
+        HeavenlyStem.SIN,    EarthlyBranch.SUL,
+        HeavenlyStem.IM,     EarthlyBranch.JA,
+        HeavenlyStem.GYE,    EarthlyBranch.CHUK
+    );
+
+    /**
+     * 백호살 판단표: 일간 → 해당 지지
+     */
+    private static final Map<HeavenlyStem, EarthlyBranch> BAEK_HO_TABLE = Map.of(
+        HeavenlyStem.GAP,    EarthlyBranch.JIN,
+        HeavenlyStem.EUL,    EarthlyBranch.SA,
+        HeavenlyStem.BYEONG, EarthlyBranch.O,
+        HeavenlyStem.JEONG,  EarthlyBranch.MI,
+        HeavenlyStem.MU,     EarthlyBranch.O,
+        HeavenlyStem.GI,     EarthlyBranch.MI,
+        HeavenlyStem.GYEONG, EarthlyBranch.SUL,
+        HeavenlyStem.SIN,    EarthlyBranch.HAE,
+        HeavenlyStem.IM,     EarthlyBranch.JA,
+        HeavenlyStem.GYE,    EarthlyBranch.CHUK
+    );
+
+    /**
+     * 천덕귀인 판단표: 월지 → 천간 대상 (8개월)
+     */
+    private static final Map<EarthlyBranch, HeavenlyStem> CHEON_DEOK_STEM_TABLE = Map.of(
+        EarthlyBranch.IN,   HeavenlyStem.JEONG,
+        EarthlyBranch.JIN,  HeavenlyStem.IM,
+        EarthlyBranch.SA,   HeavenlyStem.SIN,
+        EarthlyBranch.MI,   HeavenlyStem.GAP,
+        EarthlyBranch.SIN,  HeavenlyStem.GYE,
+        EarthlyBranch.SUL,  HeavenlyStem.BYEONG,
+        EarthlyBranch.HAE,  HeavenlyStem.EUL,
+        EarthlyBranch.CHUK, HeavenlyStem.GYEONG
+    );
+
+    /**
+     * 천덕귀인 판단표: 월지 → 지지 대상 (4개월)
+     */
+    private static final Map<EarthlyBranch, EarthlyBranch> CHEON_DEOK_BRANCH_TABLE = Map.of(
+        EarthlyBranch.MYO, EarthlyBranch.SIN,
+        EarthlyBranch.O,   EarthlyBranch.HAE,
+        EarthlyBranch.YU,  EarthlyBranch.IN,
+        EarthlyBranch.JA,  EarthlyBranch.SA
+    );
+
     public SinSalDetectorService(SinSalDataService dataService) {
         this.dataService = dataService;
     }
@@ -61,17 +166,29 @@ public class SinSalDetectorService {
      * 연/월/일주로부터 신살 목록 반환
      */
     public List<SinSalInfo> detect(ThreePillars pillars) {
-        HeavenlyStem dayStem   = pillars.getDayPillar().getStem();
+        HeavenlyStem dayStem    = pillars.getDayPillar().getStem();
         EarthlyBranch dayBranch = pillars.getDayPillar().getBranch();
+        EarthlyBranch monthBranch = pillars.getMonthPillar().getBranch();
+        EarthlyBranch yearBranch  = pillars.getYearPillar().getBranch();
 
         Set<EarthlyBranch> branches = EnumSet.of(
             pillars.getYearPillar().getBranch(),
             pillars.getMonthPillar().getBranch(),
             pillars.getDayPillar().getBranch()
         );
+        Set<HeavenlyStem> stems = EnumSet.of(
+            pillars.getYearPillar().getStem(),
+            pillars.getMonthPillar().getStem(),
+            pillars.getDayPillar().getStem()
+        );
+        if (pillars.hasHourPillar()) {
+            branches.add(pillars.getHourPillar().getBranch());
+            stems.add(pillars.getHourPillar().getStem());
+        }
 
         List<SinSalInfo> result = new ArrayList<>();
 
+        // 기존 7종
         if (hasCheonEulGwiIn(dayStem, branches))   result.add(dataService.get("cheon_eul_gwi_in"));
         if (hasDoHwaSal(branches))                  result.add(dataService.get("do_hwa_sal"));
         if (hasYeokMaSal(branches))                 result.add(dataService.get("yeok_ma_sal"));
@@ -79,6 +196,16 @@ public class SinSalDetectorService {
         if (hasHwaGaeSal(branches))                 result.add(dataService.get("hwa_gae_sal"));
         if (hasWonJinSal(branches))                 result.add(dataService.get("won_jin_sal"));
         if (hasGwiMunGwanSal(branches))             result.add(dataService.get("gwi_mun_gwan_sal"));
+
+        // 추가 8종
+        if (hasCheonDeokGwiIn(monthBranch, stems, branches)) result.add(dataService.get("cheon_deok_gwi_in"));
+        if (hasWolDeokGwiIn(monthBranch, stems))              result.add(dataService.get("wol_deok_gwi_in"));
+        if (hasMunChangGwiIn(dayStem, branches))              result.add(dataService.get("mun_chang_gwi_in"));
+        if (hasHakDangGwiIn(dayStem, branches))               result.add(dataService.get("hak_dang_gwi_in"));
+        if (hasGeumYeoRok(dayStem, branches))                 result.add(dataService.get("geum_yeo_rok"));
+        if (hasYangInSal(dayStem, branches))                  result.add(dataService.get("yang_in_sal"));
+        if (hasBaekHoSal(dayStem, branches))                  result.add(dataService.get("baek_ho_sal"));
+        if (hasGwaSukSal(yearBranch, branches))               result.add(dataService.get("gwa_suk_sal"));
 
         return result;
     }
@@ -133,10 +260,10 @@ public class SinSalDetectorService {
      *   해묘미 삼합에 미가 있으면
      */
     private boolean hasHwaGaeSal(Set<EarthlyBranch> b) {
-        return (anyOf(b, EarthlyBranch.IN, EarthlyBranch.O, EarthlyBranch.SUL)   && b.contains(EarthlyBranch.SUL)) ||
-               (anyOf(b, EarthlyBranch.SA, EarthlyBranch.YU, EarthlyBranch.CHUK) && b.contains(EarthlyBranch.CHUK)) ||
-               (anyOf(b, EarthlyBranch.SIN, EarthlyBranch.JA, EarthlyBranch.JIN) && b.contains(EarthlyBranch.JIN)) ||
-               (anyOf(b, EarthlyBranch.HAE, EarthlyBranch.MYO, EarthlyBranch.MI) && b.contains(EarthlyBranch.MI));
+        return (anyOf(b, EarthlyBranch.IN, EarthlyBranch.O)   && b.contains(EarthlyBranch.SUL)) ||
+               (anyOf(b, EarthlyBranch.SA, EarthlyBranch.YU)  && b.contains(EarthlyBranch.CHUK)) ||
+               (anyOf(b, EarthlyBranch.SIN, EarthlyBranch.JA) && b.contains(EarthlyBranch.JIN)) ||
+               (anyOf(b, EarthlyBranch.HAE, EarthlyBranch.MYO) && b.contains(EarthlyBranch.MI));
     }
 
     /**
@@ -165,6 +292,68 @@ public class SinSalDetectorService {
         long count = List.of(EarthlyBranch.IN, EarthlyBranch.SIN, EarthlyBranch.SA, EarthlyBranch.HAE)
                         .stream().filter(b::contains).count();
         return count >= 2;
+    }
+
+    // ── 추가 8종 신살 판단 ──────────────────────────────────────
+
+    /** 천덕귀인: 월지 기준 해당 천간 또는 지지가 사주에 있으면 */
+    private boolean hasCheonDeokGwiIn(EarthlyBranch monthBranch, Set<HeavenlyStem> stems, Set<EarthlyBranch> branches) {
+        HeavenlyStem stemTarget = CHEON_DEOK_STEM_TABLE.get(monthBranch);
+        if (stemTarget != null && stems.contains(stemTarget)) return true;
+        EarthlyBranch branchTarget = CHEON_DEOK_BRANCH_TABLE.get(monthBranch);
+        return branchTarget != null && branches.contains(branchTarget);
+    }
+
+    /** 월덕귀인: 월지 삼합 그룹 기준 해당 천간이 사주에 있으면 */
+    private boolean hasWolDeokGwiIn(EarthlyBranch monthBranch, Set<HeavenlyStem> stems) {
+        HeavenlyStem target = switch (monthBranch) {
+            case IN, O, SUL    -> HeavenlyStem.BYEONG;
+            case SIN, JA, JIN  -> HeavenlyStem.IM;
+            case HAE, MYO, MI  -> HeavenlyStem.GAP;
+            case SA, YU, CHUK  -> HeavenlyStem.GYEONG;
+        };
+        return stems.contains(target);
+    }
+
+    /** 문창귀인: 일간 기준 해당 지지가 사주에 있으면 */
+    private boolean hasMunChangGwiIn(HeavenlyStem dayStem, Set<EarthlyBranch> branches) {
+        EarthlyBranch target = MUN_CHANG_TABLE.get(dayStem);
+        return target != null && branches.contains(target);
+    }
+
+    /** 학당귀인: 일간 기준 장생 위치 지지가 사주에 있으면 */
+    private boolean hasHakDangGwiIn(HeavenlyStem dayStem, Set<EarthlyBranch> branches) {
+        EarthlyBranch target = HAK_DANG_TABLE.get(dayStem);
+        return target != null && branches.contains(target);
+    }
+
+    /** 금여록: 일간 기준 해당 지지가 사주에 있으면 */
+    private boolean hasGeumYeoRok(HeavenlyStem dayStem, Set<EarthlyBranch> branches) {
+        EarthlyBranch target = GEUM_YEO_TABLE.get(dayStem);
+        return target != null && branches.contains(target);
+    }
+
+    /** 양인살: 일간 기준 제왕 위치 지지가 사주에 있으면 */
+    private boolean hasYangInSal(HeavenlyStem dayStem, Set<EarthlyBranch> branches) {
+        EarthlyBranch target = YANG_IN_TABLE.get(dayStem);
+        return target != null && branches.contains(target);
+    }
+
+    /** 백호살: 일간 기준 해당 지지가 사주에 있으면 */
+    private boolean hasBaekHoSal(HeavenlyStem dayStem, Set<EarthlyBranch> branches) {
+        EarthlyBranch target = BAEK_HO_TABLE.get(dayStem);
+        return target != null && branches.contains(target);
+    }
+
+    /** 고숙살: 연지 삼합 그룹 기준 해당 지지가 사주에 있으면 */
+    private boolean hasGwaSukSal(EarthlyBranch yearBranch, Set<EarthlyBranch> branches) {
+        EarthlyBranch target = switch (yearBranch) {
+            case IN, MYO, JIN  -> EarthlyBranch.SA;
+            case SA, O, MI     -> EarthlyBranch.SIN;
+            case SIN, YU, SUL  -> EarthlyBranch.HAE;
+            case HAE, JA, CHUK -> EarthlyBranch.IN;
+        };
+        return branches.contains(target);
     }
 
     private boolean anyOf(Set<EarthlyBranch> branches, EarthlyBranch... candidates) {
