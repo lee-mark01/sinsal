@@ -48,24 +48,13 @@ public class SajuCalculatorService {
     }
 
     /**
-     * 생년월일(양력)로부터 연·월·일주를 계산한다. (시주 미포함)
+     * 생년월일(양력)로부터 연·월·일주를 계산한다.
      */
     public ThreePillars calculate(LocalDate birthDate) {
-        return calculate(birthDate, null);
-    }
-
-    /**
-     * 생년월일(양력) + 출생 시각으로부터 연·월·일·시주를 계산한다.
-     *
-     * @param birthDate 생년월일
-     * @param birthTime 출생 시각 (HH:mm 형식). null이면 시주를 계산하지 않음.
-     */
-    public ThreePillars calculate(LocalDate birthDate, String birthTime) {
         Pillar yearPillar  = calcYearPillar(birthDate);
         Pillar monthPillar = calcMonthPillar(birthDate, yearPillar.getStem());
         Pillar dayPillar   = calcDayPillar(birthDate);
-        Pillar hourPillar  = (birthTime != null) ? calcHourPillar(birthTime, dayPillar.getStem()) : null;
-        return new ThreePillars(yearPillar, monthPillar, dayPillar, hourPillar);
+        return new ThreePillars(yearPillar, monthPillar, dayPillar);
     }
 
     // ── 연주 ──────────────────────────────────────────────────────
@@ -130,27 +119,6 @@ public class SajuCalculatorService {
         long daysSince = ChronoUnit.DAYS.between(BASE_DATE, birthDate);
         int stemIdx   = positiveMod((int)(daysSince + BASE_STEM_IDX),   10);
         int branchIdx = positiveMod((int)(daysSince + BASE_BRANCH_IDX), 12);
-        return new Pillar(HeavenlyStem.fromIndex(stemIdx), EarthlyBranch.fromIndex(branchIdx));
-    }
-
-    // ── 시주 ──────────────────────────────────────────────────────
-
-    /**
-     * 시주 계산 (오자원두법, 五子元頭法)
-     *
-     * 시지: 자시(子時)는 23:00~01:00 → branchIndex=0
-     *       이후 2시간 단위로 하나씩 증가
-     * 시간: (일간.index × 2 + 시지.index) % 10
-     *
-     * @param birthTime HH:mm 형식 문자열
-     * @param dayStem   일주 천간
-     */
-    private Pillar calcHourPillar(String birthTime, HeavenlyStem dayStem) {
-        int hour = Integer.parseInt(birthTime.split(":")[0]);
-
-        int branchIdx = (hour >= 23 || hour < 1) ? 0 : (hour + 1) / 2;
-        int stemIdx   = positiveMod(dayStem.getIndex() * 2 + branchIdx, 10);
-
         return new Pillar(HeavenlyStem.fromIndex(stemIdx), EarthlyBranch.fromIndex(branchIdx));
     }
 

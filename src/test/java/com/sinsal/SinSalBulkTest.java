@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 /**
  * 생년월일 전수조사 테스트
  *
- * 1900-01-01 ~ 2010-12-31 범위의 날짜를 30일 간격으로 샘플링해
+ * 1970-01-01 ~ 2020-12-31 범위의 날짜를 30일 간격으로 샘플링해
  * 사주/신살 계산 결과를 build/sinsal_bulk_result.csv 에 기록한다.
  *
  * 전체 날짜(매일)로 돌리고 싶다면 DATE_STEP_DAYS = 1 로 변경.
@@ -33,8 +33,8 @@ class SinSalBulkTest {
     /** 샘플링 간격 (일). 1 = 매일 전수조사 (~40,000건), 30 = 월 단위 샘플 (~1,300건) */
     private static final int DATE_STEP_DAYS = 1;
 
-    private static final LocalDate START_DATE = LocalDate.of(1900, 1, 1);
-    private static final LocalDate END_DATE   = LocalDate.of(2010, 12, 31);
+    private static final LocalDate START_DATE = LocalDate.of(1970, 1, 1);
+    private static final LocalDate END_DATE   = LocalDate.of(2020, 12, 31);
 
     private static final String OUTPUT_PATH = "build/sinsal_bulk_result.csv";
 

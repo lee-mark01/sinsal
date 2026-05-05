@@ -181,10 +181,6 @@ public class SinSalDetectorService {
             pillars.getMonthPillar().getStem(),
             pillars.getDayPillar().getStem()
         );
-        if (pillars.hasHourPillar()) {
-            branches.add(pillars.getHourPillar().getBranch());
-            stems.add(pillars.getHourPillar().getStem());
-        }
 
         List<SinSalInfo> result = new ArrayList<>();
 

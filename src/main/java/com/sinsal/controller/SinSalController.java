@@ -28,18 +28,15 @@ public class SinSalController {
     /**
      * POST /api/sinsals
      * Body: { "birthDate": "1990-05-15" }
-     *       { "birthDate": "1990-05-15", "birthTime": "14:30" }  ← 시주 포함
-     *       { "birthDate": "1990-05-15", "birthTime": "00:00" }  ← 프론트 토글 OFF
      */
     @PostMapping("/sinsals")
     public ResponseEntity<SinSalResponse> getSinSals(@Valid @RequestBody SinSalRequest request) {
-        ThreePillars pillars = sajuCalculator.calculate(request.getBirthDate(), request.getBirthTime());
+        ThreePillars pillars = sajuCalculator.calculate(request.getBirthDate());
         List<SinSalInfo> sinSalInfos = sinSalDetector.detect(pillars);
 
         String pillarsStr = pillars.getYearPillar()  + "년 " +
                             pillars.getMonthPillar() + "월 " +
-                            pillars.getDayPillar()   + "일" +
-                            (pillars.hasHourPillar() ? " " + pillars.getHourPillar() + "시" : "");
+                            pillars.getDayPillar()   + "일";
 
         List<SinSalResponse.SinSalItem> items = sinSalInfos.stream()
                 .map(SinSalResponse.SinSalItem::from)
