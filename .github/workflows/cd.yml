@@ -31,7 +31,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd ~/sinsal
-            git pull origin feat/monitoring
+            git pull origin develop
             ./gradlew bootJar
             docker compose down
             docker compose up -d --build
