@@ -1,6 +1,6 @@
 services:
   sinsal-api:
-    image: 516232034601.dkr.ecr.ap-northeast-2.amazonaws.com/sinsal-api:latest
+    image: 242777378795.dkr.ecr.ap-northeast-2.amazonaws.com/sinsal-api:latest
     container_name: sinsal-api
     restart: unless-stopped
     expose:

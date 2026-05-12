@@ -6,7 +6,7 @@ on:
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
-  ECR_REGISTRY: 516232034601.dkr.ecr.ap-northeast-2.amazonaws.com
+  ECR_REGISTRY: 242777378795.dkr.ecr.ap-northeast-2.amazonaws.com
   ECR_REPOSITORY: sinsal-api
 
 jobs:
@@ -53,6 +53,6 @@ jobs:
           script: |
             cd 14th-nue-collab-backend
             git pull origin develop
-            aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 516232034601.dkr.ecr.ap-northeast-2.amazonaws.com
+            aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 242777378795.dkr.ecr.ap-northeast-2.amazonaws.com
             docker compose pull
             docker compose up -d
