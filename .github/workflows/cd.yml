@@ -51,11 +51,8 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            cd 14th-nue-collab-backend
+            git pull origin develop
             aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 516232034601.dkr.ecr.ap-northeast-2.amazonaws.com
-            docker stop sinsal-api || true
-            docker rm sinsal-api || true
-            docker pull 516232034601.dkr.ecr.ap-northeast-2.amazonaws.com/sinsal-api:latest
-            docker run -d \
-              --name sinsal-api \
-              -p 8080:8080 \
-              516232034601.dkr.ecr.ap-northeast-2.amazonaws.com/sinsal-api:latest
+            docker compose pull
+            docker compose up -d
