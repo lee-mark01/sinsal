@@ -1,0 +1,26 @@
+services:
+  sinsal-api:
+    image: 242777378795.dkr.ecr.ap-northeast-2.amazonaws.com/sinsal-api:latest
+    container_name: sinsal-api
+    restart: unless-stopped
+    expose:
+      - "8080"
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - sinsal-api
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
